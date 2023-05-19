@@ -1,0 +1,197 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:gamology_riverpod/common/constants.dart';
+import 'package:gamology_riverpod/domain/entities/game_detail.dart';
+import 'package:gamology_riverpod/domain/entities/platform.dart';
+import 'package:gamology_riverpod/presentation/provider/game_detail_notifier.dart';
+import 'package:gamology_riverpod/presentation/widgets/add_platform_icons.dart';
+import 'package:collection/collection.dart';
+
+class GameDetailPage extends ConsumerWidget{
+  final List screenshots;
+  final int id;
+
+  const GameDetailPage({
+    super.key,
+    required this.screenshots,
+    required this.id
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gameDetail = ref.watch(getGameDetailProvider(id));
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: DarkTheme.scaffoldBackgroundColor,
+        title: const Text("Game Detail"),
+        elevation: 0,
+      ),
+      body: gameDetail.when(
+        data: (gameDetail) => DetailContent(
+          gameDetail: gameDetail!,
+          screenshots: screenshots
+        ),
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (error, stackTrace) => Center(
+          child: Text(stackTrace.toString()),
+        ),
+      ),
+    );
+  }
+}
+
+class DetailContent extends StatelessWidget {
+  final GameDetail gameDetail;
+  final List screenshots;
+
+  const DetailContent({
+    super.key,
+    required this.gameDetail,
+    required this.screenshots,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String publishers = '';
+    String developers = '';
+    String genres = '';
+    String platforms = '';
+    bool pcReq = false;
+    Platform? platform = const Platform(id: 1, name: 'temp', requirements: null);
+
+    if (gameDetail.platforms.isNotEmpty) {
+      platform = gameDetail.platforms.firstWhereOrNull((element) => element.name == "PC");
+      if (platform != null) {
+        if (platform.requirements!.recommended != null) {
+          pcReq = true;
+        }
+      }
+    }
+
+    for(int i = 0; i < gameDetail.publishers.length; i++) {
+      if (i < gameDetail.publishers.length - 1) {
+        publishers += '${gameDetail.publishers[i].name}, ';
+      } else {
+        publishers += gameDetail.publishers[i].name;
+      }
+    }
+    for(int i = 0; i < gameDetail.developers.length; i++) {
+      if (i < gameDetail.developers.length - 1) {
+        developers += '${gameDetail.developers[i].name}, ';
+      } else {
+        developers += gameDetail.developers[i].name;
+      }
+    }
+    for(int i = 0; i < gameDetail.genres.length; i++) {
+      if (i < gameDetail.genres.length - 1) {
+        genres += '${gameDetail.genres[i].name}, ';
+      } else {
+        genres += gameDetail.genres[i].name;
+      }
+    }
+    for(int i = 0; i < gameDetail.platforms.length; i++) {
+      if (i < gameDetail.platforms.length - 1) {
+        platforms += '${gameDetail.platforms[i].name}, ';
+      } else {
+        platforms += gameDetail.platforms[i].name;
+      }
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(child: Text(gameDetail.name, style: DarkTheme.headline1)),
+            const SizedBox(height: 8),
+            Center(child: ClipRRect(borderRadius: BorderRadius.circular(8), child: CachedNetworkImage(imageUrl: gameDetail.backgroundImage))),
+            const SizedBox(height: 8),
+            Center(child: addPlatformIcons(gameDetail.platforms),),
+            const SizedBox(height: 8),
+            Center(child: Text("Playtime: ${gameDetail.playtime} hours")),
+            const SizedBox(height: 16),
+            const Text("About", style: DarkTheme.headline2),
+            const SizedBox(height: 8),
+            HtmlWidget(gameDetail.description),
+            const SizedBox(height: 8),
+            const Text("Screenshots", style: DarkTheme.headline2),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 200,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) {
+                  String screenshot = screenshots[index].toString();
+                  return Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: screenshot,
+                          placeholder:  (context, url) => const CircularProgressIndicator()
+                        )
+                      ),
+                      index < screenshots.length - 1 ? const SizedBox(width: 8) : Container(),
+                    ],
+                  );
+                }, itemCount: screenshots.length,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Release Date", style: DarkTheme.headline4),
+                      Text(gameDetail.released),
+                      const SizedBox(height: 8),
+                      const Text("Genre", style: DarkTheme.headline4),
+                      Text(genres),
+                      const SizedBox(height: 8),
+                      const Text("Platforms", style: DarkTheme.headline4),
+                      Text(platforms),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Publisher", style: DarkTheme.headline4),
+                      Text(publishers),
+                      const SizedBox(height: 8),
+                      const Text("Developer", style: DarkTheme.headline4),
+                      Text(developers),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            pcReq ?
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('System Requirements for PC', style: DarkTheme.headline2),
+                const SizedBox(height: 8),
+                Text(platform!.requirements!.minimum!.replaceAll("Â®", "®")),
+                const SizedBox(height: 8),
+                Text(platform!.requirements!.recommended!.replaceAll("Â®", "®")),
+              ],
+            ) : Container(),
+          ],
+        ),
+      ),
+    );
+  }}
