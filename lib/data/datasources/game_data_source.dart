@@ -15,7 +15,7 @@ abstract class GameDataSource {
 }
 
 class GameDataSourceImpl implements GameDataSource {
-  static const apiKey = "bfc324abd5744971b5019694d16fe07e";
+  static const apiKey = "3f4cb34acd3a4433a8bf4310f000d113";
   static const baseUrl = "https://api.rawg.io/api";
 
   final http.Client client;
@@ -39,6 +39,7 @@ class GameDataSourceImpl implements GameDataSource {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
 
+    print('$baseUrl/games?page_size=15&page=$page&dates=2000-01-01,$formattedDate&ordering=-metacritic&key=$apiKey');
     final response = await client.get(
       Uri.parse("$baseUrl/games?page_size=15&page=$page&dates=2000-01-01,$formattedDate&ordering=-metacritic&key=$apiKey"),
     );
@@ -56,6 +57,8 @@ class GameDataSourceImpl implements GameDataSource {
 
     DateTime threeMonthsAgo = now.subtract(const Duration(days: 90));
     String formattedThreeMonthsAgo = DateFormat('yyyy-MM-dd').format(threeMonthsAgo);
+
+    print('$baseUrl/games?page_size=15&page=$page&dates=$formattedThreeMonthsAgo,$formattedDate&ordering=-metacritic&key=$apiKey');
 
     final response = await client.get(
       Uri.parse("$baseUrl/games?page_size=15&page=$page&dates=$formattedThreeMonthsAgo,$formattedDate&ordering=-metacritic&key=$apiKey"),

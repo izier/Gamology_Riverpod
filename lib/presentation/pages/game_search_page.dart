@@ -24,6 +24,7 @@ class GameSearchPage extends ConsumerWidget{
           children: [
             TextField(
               onChanged: (query) {
+                print('start scenario 2');
                 searchQuery = query;
                 ref.watch(gameSearchProvider(searchQuery));
               },

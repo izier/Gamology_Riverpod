@@ -11,9 +11,9 @@ class HomePage extends ConsumerWidget{
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final popularGameList = ref.read(getPopularGameListProvider(1));
-    final topRatedGameList = ref.read(getTopRatedListProvider(1));
-    final newReleasedGameList = ref.read(getNewReleasedGameListProvider(1));
+    final popularGameList = ref.watch(getPopularGameListProvider(1));
+    final topRatedGameList = ref.watch(getTopRatedListProvider(1));
+    final newReleasedGameList = ref.watch(getNewReleasedGameListProvider(1));
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -72,6 +72,7 @@ class HomePage extends ConsumerWidget{
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
                     final game = games[index];
+                    print('scenario 1 finished');
                     return HomeGameCard(game);
                   },
                   itemCount: 15,

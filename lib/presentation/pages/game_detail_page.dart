@@ -57,6 +57,7 @@ class DetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('scenario 2 finished');
     String publishers = '';
     String developers = '';
     String genres = '';

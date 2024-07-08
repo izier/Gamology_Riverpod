@@ -17,7 +17,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
 
-  final List _children = [const HomePage(), PopularGameListPage(),  TopRatedGameListPage(),  NewReleasedGameListPage(), GameNewsPage()];
+  final List _children = [const HomePage(), PopularGameListPage(),  TopRatedGameListPage(),  NewReleasedGameListPage(), NewsPage()];
 
   void onTabTapped(int index) {
     setState(() {

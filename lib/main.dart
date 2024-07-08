@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('start scenario 1');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Gamology',
